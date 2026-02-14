@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gouvernance | Directeur</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .kpi-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .kpi-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
+        .kpi-number { font-size: 2.5em; font-weight: bold; color: #005eb8; margin: 10px 0; }
+        .kpi-label { color: #666; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; }
+        
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #005eb8; color: white; }
+        .status-badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8em; font-weight: bold; }
+        .s-attente { background: #ffeaa7; color: #d35400; }
+        .s-traite { background: #55efc4; color: #00b894; }
+        .s-rejete { background: #fab1a0; color: #c0392b; }
+        
+        .logout { background: #ff7675; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🏛️ Tableau de Bord National</h1>
+        <div>
+            <span id="welcomeMsg" style="margin-right: 15px; font-weight: bold;"></span>
+            <button class="logout" onclick="window.location.href='login.html'">Déconnexion</button>
+        </div>
+    </div>
+
+    <div class="kpi-container">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Signalements</div>
+            <div class="kpi-number" id="kpi-total">-</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Urgence Critique (>4/5)</div>
+            <div class="kpi-number" id="kpi-urgent" style="color: #e74c3c;">-</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Dossiers Traités</div>
+            <div class="kpi-number" id="kpi-done" style="color: #27ae60;">-</div>
+        </div>
+    </div>
+
+    <h3>🔍 Historique Global des Incidents</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Lieu</th>
+                <th>Urgence IA</th>
+                <th>Statut</th>
+                <th>Validateur</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            </tbody>
+    </table>
+
+    <script>
+        document.getElementById('welcomeMsg').innerText = localStorage.getItem('currentUser');
+
+        async function loadDashboard() {
+            try {
+                // Le directeur récupère TOUT (role=directeur)
+                const response = await fetch('http://localhost:8000/api/reports?role=directeur');
+                const data = await response.json();
+
+                // 1. Calcul des stats
+                document.getElementById('kpi-total').innerText = data.length;
+                document.getElementById('kpi-urgent').innerText = data.filter(r => r.ai_analysis.urgence >= 4).length;
+                document.getElementById('kpi-done').innerText = data.filter(r => r.statut === "Traité").length;
+
+                // 2. Remplissage du tableau
+                const tbody = document.getElementById('table-body');
+                tbody.innerHTML = ''; // Clear
+
+                // On trie pour avoir les plus récents en haut
+                data.reverse().forEach(row => {
+                    // Couleur du statut
+                    let badgeClass = 's-attente';
+                    if(row.statut === 'Traité') badgeClass = 's-traite';
+                    if(row.statut === 'Rejeté') badgeClass = 's-rejete';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>#${row.id}</td>
+                        <td>${new Date(row.date).toLocaleDateString()}</td>
+                        <td><strong>${row.lieu}</strong></td>
+                        <td style="font-weight:bold; color: ${row.ai_analysis.urgence >= 4 ? 'red' : 'black'}">${row.ai_analysis.urgence}/5</td>
+                        <td><span class="status-badge ${badgeClass}">${row.statut}</span></td>
+                        <td>${row.validateur || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error("Erreur connexion backend:", error);
+            }
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

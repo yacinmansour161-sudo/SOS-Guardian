@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Nouveau Signalement</title>
+    <style>
+        body{font-family:'Segoe UI', sans-serif; padding:20px; background:#f0f2f5; display:flex; justify-content:center;}
+        .card{background:white; padding:30px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1); width:100%; max-width:500px;}
+        h2 { color: #005eb8; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        input[type="text"], select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; background: #e8f0fe; padding: 10px; border-radius: 5px; }
+        button { background:#d32f2f; color:white; border:none; padding:15px; border-radius:5px; cursor:pointer; width:100%; font-size:1.1em; font-weight:bold; transition:0.3s; }
+        button:hover { background:#b71c1c; }
+        #status { margin-top: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🚩 Création d'un Signalement</h2>
+        
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="anonymous">
+            <label for="anonymous" style="margin:0; cursor:pointer;">Rester Anonyme ?</label>
+        </div>
+
+        <div class="form-group">
+            <label>Programme (Village) :</label>
+            <select id="village">
+                <option value="Akouda">Akouda</option>
+                <option value="Gammarth">Gammarth</option>
+                <option value="Mahres">Mahres</option>
+                <option value="Siliana">Siliana</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Nom & Prénom de l'Enfant :</label>
+            <input type="text" id="childName" placeholder="Ex: Ahmed Ben Ali">
+        </div>
+
+        <div class="form-group">
+            <label>Nom de l'Abuseur (Si connu) :</label>
+            <input type="text" id="abuserName" placeholder="Ex: Oncle, Voisin, ou Nom...">
+        </div>
+
+        <div class="form-group">
+            <label>Description Libre (Dites tout ce qui s'est passé) :</label>
+            <textarea id="description" rows="4" placeholder="Ex: J'ai vu des traces de coups sur le dos de l'enfant, il pleurait..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Preuves (Photos, Vidéos, Audio, Documents) :</label>
+            <input type="file" id="files" multiple> 
+            <small style="color:#666">Maintenez "Ctrl" pour sélectionner plusieurs fichiers.</small>
+        </div>
+        
+        <button onclick="sendReport()">Envoyer & Analyser (IA)</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function sendReport() {
+            const btn = document.querySelector('button');
+            const status = document.getElementById('status');
+            btn.disabled = true;
+            status.innerHTML = "⏳ Analyse IA et envoi sécurisé en cours...";
+
+            const formData = new FormData();
+            
+            // Ajout des champs textes
+            formData.append('is_anonymous', document.getElementById('anonymous').checked);
+            formData.append('village', document.getElementById('village').value);
+            formData.append('child_name', document.getElementById('childName').value);
+            formData.append('abuser_name', document.getElementById('abuserName').value || "Inconnu");
+            formData.append('description', document.getElementById('description').value);
+            formData.append('emetteur_login', localStorage.getItem('currentUser') || "Utilisateur");
+
+            // Ajout des fichiers multiples (Boucle magique)
+            const fileInput = document.getElementById('files');
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('files', fileInput.files[i]);
+            }
+
+            try {
+                const req = await fetch('http://localhost:8000/api/submit_report', { method: 'POST', body: formData });
+                const res = await req.json();
+                
+                let color = res.analysis.urgence >= 4 ? "red" : "green";
+                status.innerHTML = `
+                    <h3 style="color:${color}">✅ Signalement Enregistré</h3>
+                    <p><strong>Catégorie IA :</strong> ${res.analysis.category}</p>
+                    <p><strong>Urgence IA :</strong> ${res.analysis.urgence}/5</p>
+                    <p><i>${res.analysis.conseil_ia}</i></p>
+                `;
+            } catch (e) { 
+                status.innerText = "Erreur serveur.";
+                console.error(e);
+            }
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>

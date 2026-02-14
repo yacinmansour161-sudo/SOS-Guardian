@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau de Bord Psychologue</title>
+    <style>
+        body{font-family:'Segoe UI', sans-serif; padding:20px; background:#f0f2f5;}
+        h1 { color: #005eb8; }
+        .report-card { background:white; padding:20px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+        button { background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold; }
+        button:hover { background:#219150; }
+        img { max-width: 150px; border: 2px solid #ddd; border-radius: 5px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🩺 Tableau de Bord Psychologue</h1>
+    <div id="reports-container">Chargement...</div>
+
+    <script>
+        // --- C'EST ICI QUE LE CODE JAVASCRIPT COMMENCE ---
+        
+        async function loadReports() {
+            // 1. Récupération des infos de connexion
+            const userVillage = localStorage.getItem('userVillage');
+            const userRole = localStorage.getItem('currentRole');
+            
+            // Mise à jour du titre
+            document.querySelector('h1').innerText = `🩺 Tableau de Bord (${userVillage})`;
+
+            // 2. Appel au serveur (avec filtre)
+            const url = `http://localhost:8000/api/reports?role=${userRole}&village=${userVillage}`;
+            
+            try {
+                const req = await fetch(url); 
+                const reports = await req.json();
+                
+                const container = document.getElementById('reports-container');
+                container.innerHTML = "";
+    
+                if (reports.length === 0) {
+                     container.innerHTML = "<p>Aucun dossier en attente pour ce village.</p>";
+                     return;
+                }
+
+                // 3. Affichage des dossiers
+                reports.reverse().forEach(r => {
+                    if(r.statut !== "En attente") return;
+
+                    // Gestion des fichiers (Images/Audio)
+                    let filesHtml = "";
+                    if(r.preuves_fichiers && r.preuves_fichiers.length > 0){
+                        filesHtml = `<div style="margin-top:10px; padding:10px; background:#f9f9f9; border-radius:5px;"><strong>📎 Pièces jointes :</strong><br>`;
+                        r.preuves_fichiers.forEach(filename => {
+                            const fileUrl = `http://localhost:8000/uploads/${filename}`;
+                            const ext = filename.split('.').pop().toLowerCase();
+                            
+                            if(['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                                filesHtml += `<a href="${fileUrl}" target="_blank"><img src="${fileUrl}"></a> `;
+                            } else {
+                                filesHtml += `<p>📄 <a href="${fileUrl}" target="_blank">Voir le fichier (${filename})</a></p>`;
+                            }
+                        });
+                        filesHtml += `</div>`;
+                    }
+
+                    // Gestion Urgence (Couleur Rouge si > 3)
+                    const isUrgent = r.urgence_ia >= 4;
+                    const urgencyColor = isUrgent ? 'red' : 'green';
+                    const urgencyBg = isUrgent ? '#fff5f5' : 'white';
+                    const borderStyle = isUrgent ? '5px solid red' : '5px solid #2ecc71';
+
+                    const div = document.createElement('div');
+                    div.className = "report-card";
+                    div.style.borderLeft = borderStyle;
+                    div.style.background = urgencyBg;
+
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3>📍 ${r.village} | Enfant: ${r.child_name}</h3>
+                            <h3 style="color:${urgencyColor}">Urgence IA: ${r.urgence_ia}/5</h3>
+                        </div>
+                        <p><strong>Catégorie :</strong> ${r.categorie_ia}</p>
+                        <p><strong>Description :</strong> <i>"${r.description_originale}"</i></p>
+                        ${filesHtml}
+                        <br>
+                        <button onclick="valider(${r.id})">✅ Traiter le dossier</button>
+                    `;
+                    container.appendChild(div);
+                });
+
+            } catch (e) {
+                console.error("Erreur chargement", e);
+                document.getElementById('reports-container').innerText = "Erreur de connexion au serveur.";
+            }
+        }
+
+        async function valider(id) {
+            await fetch('http://localhost:8000/api/validate_report', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    report_id: id,
+                    psy_name: localStorage.getItem('currentUser'),
+                    final_report: "Pris en charge.",
+                    decision: "Valide"
+                })
+            });
+            loadReports(); // Recharger la liste après validation
+        }
+
+        // Lancer le chargement au démarrage
+        loadReports();
+    </script>
+</body>
+</html>

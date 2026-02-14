@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SOS-Guardian | Connexion</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #eef2f5; margin: 0; }
+        .login-container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        h2 { color: #005eb8; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #005eb8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 15px; font-weight: bold; }
+        button:hover { background: #004487; }
+        .error-msg { color: red; font-size: 0.85em; margin-top: 10px; display: none; }
+        .hint { margin-top: 20px; font-size: 0.75em; color: #555; text-align: left; background: #f0f0f0; padding: 10px; border-radius: 5px; height: 150px; overflow-y: scroll; }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>🛡️ SOS-Guardian</h2>
+        <p>Portail d'Authentification</p>
+        
+        <form onsubmit="handleLogin(event)">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Mot de passe" required>
+            <button type="submit">Se connecter</button>
+        </form>
+
+        <div id="error" class="error-msg">⛔ Accès refusé.</div>
+
+        <div class="hint">
+            <strong>Comptes de Test :</strong><br>
+            --- GAMMARTH ---<br>
+            👤 psy1@sos.tn (Gammarth)<br>
+            👤 psy2@sos.tn (Gammarth)<br>
+            --- SILIANA ---<br>
+            👤 psy3@sos.tn (Siliana)<br>
+            👤 psy4@sos.tn (Siliana)<br>
+            --- AKOUDA ---<br>
+            👤 psy5@sos.tn (Akouda)<br>
+            --- AUTRES ---<br>
+            👤 mere@sos.tn (Utilisateur)<br>
+            👤 dir@sos.tn (Directeur General)<br>
+            🔑 MDP pour tous : 123
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION DES UTILISATEURS ET DE LEURS VILLAGES
+        const USERS = [
+            // Mère / Public
+            { email: "mere@sos.tn", pass: "123", role: "mere", village: "all", redirect: "mere.html" },
+            
+            // Psys Gammarth
+            { email: "psy1@sos.tn", pass: "123", role: "psy", village: "Gammarth", name: "Dr. Amine (Gam)", redirect: "psy.html" },
+            { email: "psy2@sos.tn", pass: "123", role: "psy", village: "Gammarth", name: "Dr. Sarah (Gam)", redirect: "psy.html" },
+            
+            // Psys Siliana
+            { email: "psy3@sos.tn", pass: "123", role: "psy", village: "Siliana", name: "Dr. Walid (Sil)", redirect: "psy.html" },
+            { email: "psy4@sos.tn", pass: "123", role: "psy", village: "Siliana", name: "Dr. Nadia (Sil)", redirect: "psy.html" },
+
+            // Psy Akouda
+            { email: "psy5@sos.tn", pass: "123", role: "psy", village: "Akouda", name: "Dr. Karim (Ako)", redirect: "psy.html" },
+
+            // Directeur
+            { email: "dir@sos.tn", pass: "123", role: "dir", village: "all", name: "M. Le Directeur", redirect: "directeur.html" }
+        ];
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value.toLowerCase();
+            const pass = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+
+            const user = USERS.find(u => u.email === email && u.pass === pass);
+
+            if (user) {
+                // On stocke le village de l'utilisateur pour filtrer plus tard
+                localStorage.setItem('currentUser', user.name || user.email);
+                localStorage.setItem('currentRole', user.role);
+                localStorage.setItem('userVillage', user.village); 
+                window.location.href = user.redirect;
+            } else {
+                errorDiv.style.display = 'block';
+                document.querySelector('.login-container').animate([{ transform: 'translateX(-10px)' }, { transform: 'translateX(10px)' }, { transform: 'translateX(0)' }], { duration: 300 });
+            }
+        }
+    </script>
+</body>
+</html>
