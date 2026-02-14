@@ -1,0 +1,87 @@
+[
+    {
+        "id": 1,
+        "date": "2026-02-14T21:12:30.101779",
+        "village": "Akouda",
+        "child_name": "sourour hm",
+        "abuser_name": "Inconnu",
+        "emetteur": "Anonyme",
+        "description_originale": "elle est drogue",
+        "preuves_fichiers": [
+            "email_ect.pdf"
+        ],
+        "categorie_ia": "Autre",
+        "urgence_ia": 1,
+        "conseil_ia": "Surveillance accrue conseill\u00e9e.",
+        "statut": "En attente",
+        "validateur": ""
+    },
+    {
+        "id": 2,
+        "date": "2026-02-14T21:24:43.776437",
+        "village": "Gammarth",
+        "child_name": "catherine ",
+        "abuser_name": "oncle",
+        "emetteur": "mere@sos.tn",
+        "description_originale": "J'ai trouv\u00e9 une seringue et du sang",
+        "preuves_fichiers": [],
+        "categorie_ia": "DANGER CRITIQUE",
+        "urgence_ia": 5,
+        "conseil_ia": "Intervention Imm\u00e9diate",
+        "statut": "Trait\u00e9",
+        "validateur": "Dr. Amine (Gam)",
+        "rapport_psy": "Pris en charge."
+    },
+    {
+        "id": 3,
+        "date": "2026-02-14T21:25:55.154033",
+        "village": "Siliana",
+        "child_name": "carim",
+        "abuser_name": "Inconnu",
+        "emetteur": "mere@sos.tn",
+        "description_originale": "L'enfant pleure tout le temps \u00e0 l'\u00e9cole",
+        "preuves_fichiers": [
+            "1771100754_619716272_1857562508267708_5333769102619253655_n.png"
+        ],
+        "categorie_ia": "Psychologique",
+        "urgence_ia": 2,
+        "conseil_ia": "Entretien psychologique requis",
+        "statut": "Trait\u00e9",
+        "validateur": "Dr. Nadia (Sil)",
+        "rapport_psy": "Pris en charge."
+    },
+    {
+        "id": 4,
+        "date": "2026-02-14T21:33:15.914202",
+        "village": "Akouda",
+        "child_name": "bsr",
+        "abuser_name": "Inconnu",
+        "emetteur": "Anonyme",
+        "description_originale": "il ya du sang et des bruses",
+        "preuves_fichiers": [
+            "1771101195_email_ect.pdf"
+        ],
+        "categorie_ia": "DANGER IMM\u00c9DIAT (Violence/Abus)",
+        "urgence_ia": 5,
+        "conseil_ia": "Intervention imm\u00e9diate",
+        "statut": "En attente",
+        "validateur": ""
+    },
+    {
+        "id": 5,
+        "date": "2026-02-14T21:35:46.535403",
+        "village": "Mahres",
+        "child_name": "aliya",
+        "abuser_name": "oncle",
+        "emetteur": "Anonyme",
+        "description_originale": "l'oncle a voller la fille",
+        "preuves_fichiers": [
+            "1771101346_619171967_725876397061569_2407646781195179676_n.png"
+        ],
+        "categorie_ia": "Autre / A v\u00e9rifier",
+        "urgence_ia": 1,
+        "conseil_ia": "Suivi requis",
+        "statut": "En attente",
+        "validateur": ""
+    }
+]
